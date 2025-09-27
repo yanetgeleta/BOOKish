@@ -1,0 +1,34 @@
+<%- include('partials/header.ejs') %>
+<main>
+    <div class="container">
+        <span class="personal-information">
+            <img src="<%= data.profilePic %>" alt="User Avatar">
+            <p>Yanet Geleta</p>
+            <p><%= data.books %> books</p>
+        </span>
+        <span>
+            <nav>
+                <form action="/profile" method="post">
+                    <button id="toReadBtn" type="submit" name="profileList" value="wantToRead">Want to Read</button>
+                    <button id="readingBtn" type="submit" name="profileList" value="reading">Reading</button>
+                    <button id="readBtn" type="submit" name="profileList" value="read">Read</button>
+                    <button id="recBtn" type="submit" name="profileList" value="recommendation">Recommendations</button>
+                </form>
+            </nav>
+        </span>
+            <%data.list.forEach(listValue=> {%>
+                <form action="/single" method="post">
+                    <span class="books">
+                        <!-- these will be looped through for the boo   ks present -->
+                        <input type="hidden" value="<%= listValue.id %>" name="single-id">
+                        <p><%= data.listName %></p>
+                        <p class="clickable-single-book"><%= listValue.volumeInfo.title %></p>
+                        <p><%= listValue.volumeInfo.authors? listValue.volumeInfo.authors.join(", "): "Unknown Author" %></p>
+                        <button><%= listValue.listName %></button>
+                        <img class="clickable-single-book" src="<%= listValue.volumeInfo.imageLinks? listValue.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
+                    </span>
+                </form>
+            <%})%>
+    </div>
+</main>
+<%- include('partials/footer.ejs') %>
