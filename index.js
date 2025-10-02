@@ -18,6 +18,9 @@ var wantToRead = [];
 var recommendations = [];
 var categories = ["Fiction", "Mystery", "Thriller", "Science Fiction", "Fantasy", "Romance", "Historical Fiction"];
 
+async function categorySearch() {
+    
+}
 app.get("/", async (req,res)=> {
     if(reading.length) {
         let index = 0;
@@ -199,7 +202,7 @@ app.get("/profile", async(req, res)=> {
 })
 app.post("/profile", (req, res)=> {
     const list = req.body.profileList;
-    res.redirect(`/profile?list=v${encodeURIComponent(list)}`);
+    res.redirect(`/profile?list=${encodeURIComponent(list)}`);
 })
 
 app.listen(port, ()=> {

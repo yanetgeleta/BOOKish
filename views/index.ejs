@@ -1,46 +1,48 @@
 <%- include('partials/header.ejs') %>
 <main>
-    <div class="container">
+    <div class="main-container">
         <%if(locals.reading) {%>
-            <div class="currently-reading">
-                <!-- only the most recent books will be here -->
-                 <form action="/single" method="post">
-                    <input name="single-id" type="hidden" value="<%= reading.id %>">
-                    <h2 class="clickable-single-book">Currently Reading</h2>
-                    <img class="clickable-single-book" src="<%= reading.volumeInfo.imageLinks? reading.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
-                    <p>
-                        <span class="clickable-single-book"><%= reading.volumeInfo.title%></span>
-                        <span><%= reading.volumeInfo.averageRating? reading.volumeInfo.averageRating: "not rated" %></span>
-                    </p>
-                 </form>
-                <p>By<%= reading.volumeInfo.authors? reading.volumeInfo.authors.join(', '): "Unknown Author" %></p>
-                <p><%= reading.volumeInfo.pageCount %></p>
-                <p><%- reading.volumeInfo.description %></p>
-                <!-- image in the left, and the other info on the right -->
-                <div class="buttons">
-                    <form action="/update-list" method="post">
-                        <input name="formLocation" value="index" type="hidden">
-                        <input type="hidden" name="selected-id" value="<%= reading.id %>">
-                        <button name="clicked-result" value="read">Finished</button>
-                        <button name="clicked-result" value="notReading">Not Reading</button> <!--maybe replace them with some signs-->
-                    </form>
-                </div>
-            </div>
-            <div class="recommendations">
-                <!-- We are gonna have a ejs that will loop through the array that we will get from the server side ( maybe we will use grid to style it) -->
-                <h2>Recommendations</h2>
-                <%if(locals.recommendation) {%>
+            <div class="left-side">
+                <div class="currently-reading">
+                    <!-- only the most recent books will be here -->
                     <form action="/single" method="post">
-                        <%recommendation.forEach(rec=> {%>
-                            <input name="single-id" type="hidden" value="<%= rec.id %>">
-                            <img class="clickable-single-book" src="<%= rec.volumeInfo.imageLinks? rec.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>" >
-                            <p class="clickable-single-book"><%= rec.volumeInfo.title %></p> <!--title-->
-                            <p><%= rec.volumeInfo.authors.join(', ') %></p> <!--authors-->
-                        <%})%>
+                        <input name="single-id" type="hidden" value="<%= reading.id %>">
+                        <h2 class="clickable-single-book">Currently Reading</h2>
+                        <img class="clickable-single-book book-thumbnail" src="<%= reading.volumeInfo.imageLinks? reading.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
+                        <p>
+                            <span class="clickable-single-book"><strong><%= reading.volumeInfo.title%></strong></span>
+                            <span><%= reading.volumeInfo.averageRating? reading.volumeInfo.averageRating: "not rated" %></span>
+                        </p>
                     </form>
-                <%}%>
-            </div>
-        <%}%>
+                    <p>By <%= reading.volumeInfo.authors? reading.volumeInfo.authors.join(', '): "Unknown Author" %></p>
+                    <p><%= reading.volumeInfo.pageCount %> pages</p>
+                    <p><%- reading.volumeInfo.description %></p>
+                    <!-- image in the left, and the other info on the right -->
+                    <div class="buttons">
+                        <form action="/update-list" method="post">
+                            <input name="formLocation" value="index" type="hidden">
+                            <input type="hidden" name="selected-id" value="<%= reading.id %>">
+                            <button name="clicked-result" value="read">Finished</button>
+                            <button name="clicked-result" value="notReading">Not Reading</button> <!--maybe replace them with some signs-->
+                        </form>
+                    </div>
+                </div>
+                <div class="recommendations">
+                    <!-- We are gonna have a ejs that will loop through the array that we will get from the server side ( maybe we will use grid to style it) -->
+                    <h2>Recommendations</h2>
+                    <%if(locals.recommendation) {%>
+                        <form action="/single" method="post">
+                            <%recommendation.forEach(rec=> {%>
+                                <input name="single-id" type="hidden" value="<%= rec.id %>">
+                                <img class="clickable-single-book" src="<%= rec.volumeInfo.imageLinks? rec.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>" >
+                                <p class="clickable-single-book"><%= rec.volumeInfo.title %></p> <!--title-->
+                                <p><%= rec.volumeInfo.authors.join(', ') %></p> <!--authors-->
+                            <%})%>
+                        </form>
+                    <%}%>
+                </div>
+            <%}%>
+        </div>
         <div class="genre">
             <h2>Explore Genres</h2>
             <!-- we will use a loop to go thru the array I will send -->
@@ -53,7 +55,7 @@
             <h2>Recommended <%= category %></h2> <!--maybe use jquery and inner html to place the specfic button selected genre-->
             <%if(locals.items) {%>
                 <%items.forEach(item=> {%>
-                    <form action="/single" method="post">
+                    <form style="display: inline-block;" action="/single" method="post">
                         <span>
                             <input name="single-id" type="hidden" value="<%= item.id %>">
                             <img class="clickable-single-book" src="<%= item.volumeInfo.imageLinks? item.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
