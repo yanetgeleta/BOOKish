@@ -1,12 +1,14 @@
-main {
-   background-color: rgb(133, 65, 65);
-   margin-top: 5rem;
+html {
+   font-family: Arial, Helvetica, sans-serif;
 }
 .main-container {
    display: flex;
    gap: 4rem;
    width: 85vw;
    margin: 2rem auto;
+}
+header {
+   border-bottom: .5px solid black;
 }
 .left-side {
    display: flex;
@@ -21,8 +23,48 @@ main {
 background-color: white;
 border-radius: 5px;
 } 
-
-.book-thumbnail {
-margin: 1.25rem auto;
-border-radius: 5px;
+.currently-reading, .genre {
+   padding: 2em;
+}
+.current-buttons-container {
+   margin-left: auto; 
+   margin-right: auto;
+   text-align: center;
+   height: 5em;
+}
+.current-buttons {
+   border-radius: 6px;
+   width: 33%;
+   border: none;
+   margin: .75em;
+   height: 2.4em;   
+}
+.finished-button {
+   background-color: rgb(7, 127, 207);
+   color: white;
+}
+.not-reading, .genre-button {
+   background-color: rgb(185, 206, 216);
+   color: rgb(7, 127, 207);
+}
+.genre-button-form {
+   display:inline-block;
+}
+.genre-button {
+   border-radius: 24px;
+   border: none;
+   margin: .25em .45em;
+   padding: .55em;
+}
+.selected-genre-button {
+   background-color: rgb(7, 127, 207);
+   color: white;
+}
+.genre-recommended-book {
+   margin: 1em 1em;
+   /* border: .25px solid gray; */
+   height: 20em;
+   width: 10em;
+   /* background-color: rgb(246, 248, 249);  */
+   border-radius: 5px;
 }

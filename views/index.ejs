@@ -5,25 +5,26 @@
             <div class="left-side">
                 <div class="currently-reading">
                     <!-- only the most recent books will be here -->
+                    <!-- look for the styles that have similar fonts and group them and do it in css together-->
                     <form action="/single" method="post">
                         <input name="single-id" type="hidden" value="<%= reading.id %>">
                         <h2 class="clickable-single-book">Currently Reading</h2>
                         <img class="clickable-single-book book-thumbnail" src="<%= reading.volumeInfo.imageLinks? reading.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
                         <p>
-                            <span class="clickable-single-book"><strong><%= reading.volumeInfo.title%></strong></span>
-                            <span><%= reading.volumeInfo.averageRating? reading.volumeInfo.averageRating: "not rated" %></span>
+                            <span style="font-family: Arial, sans-serif; font-size: 1.2rem;" class="clickable-single-book"><strong><%= reading.volumeInfo.title%></strong></span>
+                            <span style="font-family: Arial, sans-serif;"><%= reading.volumeInfo.averageRating? reading.volumeInfo.averageRating: "not rated" %></span>
                         </p>
                     </form>
-                    <p>By <%= reading.volumeInfo.authors? reading.volumeInfo.authors.join(', '): "Unknown Author" %></p>
-                    <p><%= reading.volumeInfo.pageCount %> pages</p>
-                    <p><%- reading.volumeInfo.description %></p>
+                    <p style="font-family: Arial, sans-serif; font-size: 1.2rem;">By <%= reading.volumeInfo.authors? reading.volumeInfo.authors.join(', '): "Unknown Author" %></p>
+                    <p style="font-family: Arial, sans-serif;"><%= reading.volumeInfo.pageCount %> pages</p>
+                    <p style="font-family: Arial, sans-serif; font-size: 1.12rem;"><%- reading.volumeInfo.description %></p>
                     <!-- image in the left, and the other info on the right -->
-                    <div class="buttons">
+                    <div class="current-buttons-container">
                         <form action="/update-list" method="post">
                             <input name="formLocation" value="index" type="hidden">
                             <input type="hidden" name="selected-id" value="<%= reading.id %>">
-                            <button name="clicked-result" value="read">Finished</button>
-                            <button name="clicked-result" value="notReading">Not Reading</button> <!--maybe replace them with some signs-->
+                            <button class="current-buttons finished-button" name="clicked-result" value="read">Finished</button>
+                            <button class="current-buttons not-reading" name="clicked-result" value="notReading">Not Reading</button> <!--maybe replace them with some signs-->
                         </form>
                     </div>
                 </div>
@@ -47,21 +48,21 @@
             <h2>Explore Genres</h2>
             <!-- we will use a loop to go thru the array I will send -->
              <%for(let i = 0; i < categories.length; i++) {%>
-                <form action="/" method="post">
-                    <button name="category" type="submit" value="<%= categories[i] %>"><%= categories[i] %></button>
+                <form class="genre-button-form" action="/" method="post">
+                    <button data-id="<%= categories[i] %>" class="genre-button" name="category" type="submit" value="<%= categories[i] %>"><%= categories[i] %></button>
                 </form>
              <%}%>
-             <!-- I am gonna through the genres the user is reading and place them here, put them in the array using shift first -->
+             <!-- I     am gonna through the genres the user is reading and place them here, put them in the array using shift first -->
             <h2>Recommended <%= category %></h2> <!--maybe use jquery and inner html to place the specfic button selected genre-->
             <%if(locals.items) {%>
                 <%items.forEach(item=> {%>
                     <form style="display: inline-block;" action="/single" method="post">
-                        <span>
+                        <div class="genre-recommended-book">
                             <input name="single-id" type="hidden" value="<%= item.id %>">
-                            <img class="clickable-single-book" src="<%= item.volumeInfo.imageLinks? item.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
-                            <p class="clickable-single-book"><%= item.volumeInfo.title %></p> <!--title-->
+                            <img style="border-radius: 5px;" class="clickable-single-book" src="<%= item.volumeInfo.imageLinks? item.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
+                            <p class="clickable-single-book"><strong><%= item.volumeInfo.title %></strong></p> <!--title-->
                             <p>By <%= item.volumeInfo.authors? item.volumeInfo.authors.join(", "): "Unknown Author" %></p> <!--authors-->
-                        </span>
+                        </div>
                     </form>
                 <%})%>
             <%}%>

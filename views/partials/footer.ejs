@@ -4,7 +4,7 @@
             <p id="footer-copyright" >Copyright ©️ <%= new Date().getFullYear()%>. All rights reserved</p>
             <div class="socials">
                 <a class="socials-item" href="https://x.com/Teen_Lalu" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i>X</a>
-                <a class="socials-item" href="https://www.instagram.com/laluuu_geleta/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i>Instagram</a>
+                <a class="socials-item" href="https://www.instagram.com/yanet-geleta/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i>Instagram</a>
                 <a class="socials-item" href="https://t.me/Teen_La" target="_blank" aria-label="Telegram"><i class="fab fa-telegram"></i>Telegram</a>
                 <a class="socials-item" href="https://www.facebook.com/share/1EWXB5RrdD/?mibextid=wwXIfr" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i>Facebook</a>
             </div>
@@ -32,6 +32,20 @@
         setupPrevent('readingBtn');
         setupPrevent('readBtn');
         setupPrevent('recBtn');
+
+        $('.genre-button').on('click', function() {
+            $('.genre-button').removeClass('selected-genre-button');
+            $(this).addClass('selected-genre-button');
+
+            let selectedGenreId = $(this).attr('data-id');
+            sessionStorage.setItem('selectedGenre', selectedGenreId);
+        });
+        $(document).ready(function() {
+            let savedGenreId = sessionStorage.getItem('selectedGenre');
+            if(savedGenreId) {
+                $(`[data-id="${savedGenreId}"]`).addClass('selected-genre-button')
+            }
+        })
     </script>
 </body>
 </html>
