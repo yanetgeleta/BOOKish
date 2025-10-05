@@ -53,7 +53,7 @@
                 </form>
              <%}%>
              <!-- I     am gonna through the genres the user is reading and place them here, put them in the array using shift first -->
-            <h2>Recommended <%= category %></h2> <!--maybe use jquery and inner html to place the specfic button selected genre-->
+            <h2>Recommended <span data-id="random-genre"><%= category %></span></h2> <!--maybe use jquery and inner html to place the specfic button selected genre-->
             <%if(locals.items) {%>
                 <%items.forEach(item=> {%>
                     <form style="display: inline-block;" action="/single" method="post">

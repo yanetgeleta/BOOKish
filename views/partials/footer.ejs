@@ -36,15 +36,10 @@
         $('.genre-button').on('click', function() {
             $('.genre-button').removeClass('selected-genre-button');
             $(this).addClass('selected-genre-button');
-
-            let selectedGenreId = $(this).attr('data-id');
-            sessionStorage.setItem('selectedGenre', selectedGenreId);
         });
         $(document).ready(function() {
-            let savedGenreId = sessionStorage.getItem('selectedGenre');
-            if(savedGenreId) {
-                $(`[data-id="${savedGenreId}"]`).addClass('selected-genre-button')
-            }
+            let savedGenreId = $('[data-id="random-genre"]').text();
+            $(`[data-id="${savedGenreId}"]`).addClass('selected-genre-button')
         })
     </script>
 </body>

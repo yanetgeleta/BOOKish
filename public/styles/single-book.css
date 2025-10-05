@@ -1,0 +1,26 @@
+.single-container {
+    border-radius: 6px;
+}
+.single-right-side {
+    flex: 2;
+}
+.specific-boook {
+    flex: 1;
+    max-height: 75vh;
+    position: sticky;
+    top: 1em;
+}
+.single-button {
+    border-radius: 6px;
+    width: 75%;
+}
+.book-description {
+    max-height: 40vh;
+    overflow: auto;
+}
+.book-description h2, .recommendation h2 {
+    position: sticky;
+    background-color: #f3f8fc;
+    margin-bottom: .5em;
+    top: 0em;
+}

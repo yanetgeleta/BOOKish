@@ -1,6 +1,9 @@
 html {
    font-family: Arial, Helvetica, sans-serif;
 }
+body {
+   background-color: #f3f8fc;
+}
 .main-container {
    display: flex;
    gap: 4rem;
@@ -10,10 +13,12 @@ html {
 header {
    border-bottom: .5px solid black;
 }
-.left-side {
+.left-side, .single-right-side{
    display: flex;
    flex-direction: column;
    gap: 2rem;
+}
+.left-side {
    flex: 1;
 }
 .genre {
@@ -23,7 +28,7 @@ header {
 background-color: white;
 border-radius: 5px;
 } 
-.currently-reading, .genre {
+.currently-reading, .genre, .single-right-side, .specific-boook {
    padding: 2em;
 }
 .current-buttons-container {
@@ -32,14 +37,14 @@ border-radius: 5px;
    text-align: center;
    height: 5em;
 }
-.current-buttons {
+.current-buttons, .single-button {
    border-radius: 6px;
    width: 33%;
    border: none;
    margin: .75em;
    height: 2.4em;   
 }
-.finished-button {
+.finished-button, #single-to-read {
    background-color: rgb(7, 127, 207);
    color: white;
 }
@@ -60,11 +65,13 @@ border-radius: 5px;
    background-color: rgb(7, 127, 207);
    color: white;
 }
-.genre-recommended-book {
+.genre-recommended-book, .similar-book {
    margin: 1em 1em;
-   /* border: .25px solid gray; */
-   height: 20em;
+   max-height: 17em;
    width: 10em;
-   /* background-color: rgb(246, 248, 249);  */
    border-radius: 5px;
+   overflow: auto;
+}
+.genre > h2:nth-of-type(2) {
+   margin-top: .75em;
 }

@@ -1,42 +1,47 @@
 <%- include('partials/header.ejs') %>
+<link rel="stylesheet" href="styles/single-book.css">
 <main>
-    <div class="container">
+    <div class="main-container single-container">
         <%if(locals.book) {%>
             <div class="specific-boook">
                 <img src="<%= book.volumeInfo.imageLinks? book.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
-                <p><%= book.volumeInfo.title %></p>
+                <p><strong><%= book.volumeInfo.title %></strong></p>
                 <p>By <%= book.volumeInfo.authors? book.volumeInfo.authors.join(', '): "Unknown Author" %></p>
-                <p><span><%=book.volumeInfo.averageRating? book.volumeInfo.averageRating: "not rated"%></span>  <span><%= book.volumeInfo.pageCount %></span></p>
+                <p><span><%=book.volumeInfo.averageRating? book.volumeInfo.averageRating: "not rated"%></span>   .   <span><%= book.volumeInfo.pageCount %></span></p>
                 <div class="single-buttons">
                     <form action="/update-list" method="post">
-                        <button name="clicked-result" value="wantToRead">Want to Read</button>
-                        <button name="clicked-result" value="read">Read</button>
-                        <button name="clicked-result" value="reading">Currenlty Reading</button>
+                        <button class="single-button" id="single-to-read" name="clicked-result" value="wantToRead">Want to Read</button>
+                        <button class="single-button" name="clicked-result" value="read">Read</button>
+                        <button class="single-button" name="clicked-result" value="reading">Currenlty Reading</button>
                         <input name="selected-id" value="<%= book.id %>" type="hidden">
                         <input name="formLocation" value="single-book" type="hidden">
                     </form>
                 </div>
             </div>
-        <%}%>   
-        <div class="book-description">
-            <h2>Description</h2>
-            <p><%- book.volumeInfo.description? book.volumeInfo.description: "No description" %></p>
-        </div>
-        <div class="recommendation">
-            <h2>Similar Boooks</h2>
-            <!-- there will be a loop of the following elements for books -->
-             <%if(locals.similarBooks) {%>
-                    <%similarBooks.forEach((similarBook)=> {%>
-                        <form action="/single" method="post">   
-                            <input name="single-id" type="hidden" value="<%= similarBook.id %>">
-                            <img class="clickable-single-book" src="<%= similarBook.volumeInfo.imageLinks? similarBook.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
-                            <p class="clickable-single-book" ><%= similarBook.volumeInfo.title %></p> 
-                        </form>
-                    <%})%>
-             <%} else {%>
-                <p>No similar books found</p>
-             <%}%>
-        </div>  
+        <%}%>
+        <div class="single-right-side">
+            <div class="book-description">
+                <h2>Description</h2>
+                <p><%- book.volumeInfo.description? book.volumeInfo.description: "No description" %></p>
+            </div>
+            <div class="recommendation">
+                <h2>Similar Boooks</h2>
+                <!-- there will be a loop of the following elements for books -->
+                <%if(locals.similarBooks) {%>
+                        <%similarBooks.forEach((similarBook)=> {%>
+                            <form style="display: inline-block;" action="/single" method="post">
+                                <div class="similar-book">
+                                    <input name="single-id" type="hidden" value="<%= similarBook.id %>">
+                                    <img style="border-radius: 5px;" class="clickable-single-book" src="<%= similarBook.volumeInfo.imageLinks? similarBook.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
+                                    <p class="clickable-single-book" ><%= similarBook.volumeInfo.title %></p> 
+                                </div>  
+                            </form>
+                        <%})%>
+                <%} else {%>
+                    <p>No similar books found</p>
+                <%}%>
+            </div>
+        </div>     
     </div>
 </main>
 <%- include('partials/footer.ejs') %>
