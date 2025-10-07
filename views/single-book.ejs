@@ -4,10 +4,10 @@
     <div class="main-container single-container">
         <%if(locals.book) {%>
             <div class="specific-boook">
-                <img src="<%= book.volumeInfo.imageLinks? book.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
-                <p><strong><%= book.volumeInfo.title %></strong></p>
-                <p>By <%= book.volumeInfo.authors? book.volumeInfo.authors.join(', '): "Unknown Author" %></p>
-                <p><span><%=book.volumeInfo.averageRating? book.volumeInfo.averageRating: "not rated"%></span>   .   <span><%= book.volumeInfo.pageCount %></span></p>
+                <img style="width: 40%; margin-bottom: 1em;" class="left-side-details" src="<%= book.volumeInfo.imageLinks? book.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
+                <p class="left-side-details" style="font-family: Arial, sans-serif; font-size: 1.2rem;"><strong><%= book.volumeInfo.title %></strong></p>
+                <p class="left-side-details" style="font-family: Arial, sans-serif; font-size: 1.2rem;">By <%= book.volumeInfo.authors? book.volumeInfo.authors.join(', '): "Unknown Author" %></p>
+                <p class="left-side-details" style="font-family: Arial, sans-serif;"><span><%=book.volumeInfo.averageRating? book.volumeInfo.averageRating: "not rated"%></span>   .   <span><%= book.volumeInfo.pageCount %></span></p>
                 <div class="single-buttons">
                     <form action="/update-list" method="post">
                         <button class="single-button" id="single-to-read" name="clicked-result" value="wantToRead">Want to Read</button>
@@ -19,10 +19,11 @@
                 </div>
             </div>
         <%}%>
+        <div class="vl"></div>
         <div class="single-right-side">
             <div class="book-description">
                 <h2>Description</h2>
-                <p><%- book.volumeInfo.description? book.volumeInfo.description: "No description" %></p>
+                <p style="font-family: Arial, sans-serif; font-size: 1.12rem;"><%- book.volumeInfo.description? book.volumeInfo.description: "No description" %></p>
             </div>
             <div class="recommendation">
                 <h2>Similar Boooks</h2>

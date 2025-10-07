@@ -67,11 +67,14 @@ border-radius: 5px;
 }
 .genre-recommended-book, .similar-book {
    margin: 1em 1em;
-   max-height: 17em;
+   max-height: 17.5em;
    width: 10em;
    border-radius: 5px;
    overflow: auto;
 }
 .genre > h2:nth-of-type(2) {
    margin-top: .75em;
+}
+img {
+   border-radius: 6px;
 }
