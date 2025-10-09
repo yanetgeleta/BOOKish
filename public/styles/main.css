@@ -37,14 +37,14 @@ border-radius: 5px;
    text-align: center;
    height: 5em;
 }
-.current-buttons, .single-button {
+.current-buttons, .single-button, .on-display-button {
    border-radius: 6px;
    width: 33%;
    border: none;
    margin: .75em;
    height: 2.4em;   
 }
-.finished-button, #single-to-read {
+.finished-button, #single-to-read, .on-display-button {
    background-color: rgb(7, 127, 207);
    color: white;
 }
@@ -77,4 +77,15 @@ border-radius: 5px;
 }
 img {
    border-radius: 6px;
+}
+p[class="clickable-single-book"]:hover { 
+   text-decoration: underline;
+   cursor: pointer;
+}
+footer {
+   text-align: center;
+}
+header {
+   position: sticky;
+   top: 0em;
 }

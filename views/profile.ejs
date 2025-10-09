@@ -1,11 +1,14 @@
 <%- include('partials/header.ejs') %>
+<link rel="stylesheet" href="styles/profile.css">
 <main>
     <div class="container">
-        <span class="personal-information">
+        <div class="personal-information">
             <img src="<%= data.profilePic %>" alt="User Avatar">
-            <p>Yanet Geleta</p>
-            <p><%= data.books %> books</p>
-        </span>
+            <div>
+                <p style="font-family: Arial, sans-serif; font-size: 2rem; padding: none;"><strong>Yanet Geleta</strong></p>
+                <p style="color: grey;"> <strong><%= data.books %></strong> books</p>
+            </div>
+        </div>
         <span>
             <nav>
                 <form action="/profile" method="post">
@@ -16,19 +19,26 @@
                 </form>
             </nav>
         </span>
+        <input data-id="display-list" type="hidden" value="<%= data.listName %>">
+        <!-- needed it for styling the buttons -->
+        <hr>
+        <!-- <div style="width: 100%;" class="my-books"> -->
             <%data.list.forEach(listValue=> {%>
-                <form action="/single" method="post">
-                    <span class="books">
-                        <!-- these will be looped through for the boo   ks present -->
-                        <input type="hidden" value="<%= listValue.id %>" name="single-id">
-                        <p><%= data.listName %></p>
-                        <p class="clickable-single-book"><%= listValue.volumeInfo.title %></p>
-                        <p><%= listValue.volumeInfo.authors? listValue.volumeInfo.authors.join(", "): "Unknown Author" %></p>
-                        <button><%= listValue.listName %></button>
+                <form  action="/single" method="post">
+                    <div class="profile-books">
+                        <div>
+                            <input type="hidden" value="<%= listValue.id %>" name="single-id">
+                            <p style="color: rgb(7, 127, 207);"><%= data.listName %></p>
+                            <p style="font-size: 1.4em; font-weight: bold;" class="clickable-single-book"><%= listValue.volumeInfo.title %></p>
+                            <p style="color: grey"><%= listValue.volumeInfo.authors? listValue.volumeInfo.authors.join(", "): "Unknown Author" %></p>
+                            <button class="on-display-button" >✓ <%= data.listName %></button>
+                        </div>
                         <img class="clickable-single-book" src="<%= listValue.volumeInfo.imageLinks? listValue.volumeInfo.imageLinks.thumbnail: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
-                    </span>
+                    </div>
                 </form>
+                <hr>
             <%})%>
+        <!-- </div> -->
     </div>
 </main>
 <%- include('partials/footer.ejs') %>

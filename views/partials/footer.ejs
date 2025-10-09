@@ -41,6 +41,16 @@
             let savedGenreId = $('[data-id="random-genre"]').text();
             $(`[data-id="${savedGenreId}"]`).addClass('selected-genre-button')
         })
+        $(document).ready(function() {
+            let onDisplayList = $('[data-id="display-list"]').val();
+            // console.log(onDisplayList)
+            let buttons = $(`[name="profileList"]`);
+            // console.log(buttons)
+            let button = buttons.filter(function() {
+                return $(this).text() === onDisplayList;
+            });
+            $(button).addClass('profile-clicked-list');
+        })
     </script>
 </body>
 </html>

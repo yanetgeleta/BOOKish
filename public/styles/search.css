@@ -32,6 +32,10 @@ select {
     border-radius: 25px;
     padding: .25em;
 }
+select:hover {
+    background-color: rgb(51, 88, 105);
+    color: white;
+}
 img, .search-title-author {
     display: inline-block;
 }

@@ -1,0 +1,56 @@
+.container {
+    background-color: white;
+    margin-top: 2em;
+    border-radius: 8px;
+}
+.profile-books {
+    display: flex;
+    width: 100%;
+    margin: .5em .5em 0 .5em;
+    padding: .25em;
+}
+.profile-books > img {
+    flex: 1;
+    margin-right: 5em;
+}
+.profile-books > div {
+    flex: 8;
+}
+.personal-information {
+    width: 100%;    
+    display: flex;
+    padding: 1em;
+}
+.personal-information > img {
+    border-radius: 50%;
+    min-height: 8em;
+    max-height: 8em;
+    /* width: 15%; */
+    border: .25px solid rgb(16, 68, 59);
+    flex: 1;
+    display: block;
+}
+.personal-information > div {
+    flex: 8;
+    margin-left: 2.5em;
+    align-self: center;
+    text-align: left;
+}
+nav button {
+    background-color: white;
+    border: none;
+    font-size: 1.15em;
+    margin-right: 1em;
+}
+.profile-clicked-list {
+    text-decoration: underline;
+    text-decoration-color: rgb(7, 127, 207);
+    text-decoration-thickness: .2em;
+    text-underline-offset: 1.2em;
+    color: rgb(7, 127, 207);
+    font-weight: bold;
+}
+.on-display-button {
+    width: 20%;
+    height: 3.2em;
+}
