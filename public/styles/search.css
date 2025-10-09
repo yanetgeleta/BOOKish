@@ -1,14 +1,57 @@
 .search-book {
-    display: block;
     margin: 1.5em 0;
-    background-color: white;
+    background-color: #f7fbff;
     border-radius: 7px;
     padding: 1em;
     width: 100%;
+    display: flex;
+}
+#search-input {
+    width: 75%;
+    border-radius: 33px;
+    border: 1px solid grey;
+    padding: .7em;
+    font-size: 1.2em;
+    position: relative;
+    left: 12%;
+}
+.container > form:nth-child(1) {
+    margin: 1.5em auto;
+    width: 100%;
+}
+#search-heading {
+    position: sticky;
+    top: 0em;
+    background-color: #f7fbff;
+    padding-bottom: .75em;
 }
 select {
     appearance: none;
+    font-size: 1.25em;
+    text-align: center;
+    border-radius: 25px;
+    padding: .25em;
 }
-img, .search-title-author, #select-list {
+img, .search-title-author {
     display: inline-block;
+}
+.search-title-author {
+    margin: 1em;
+}
+#search-book-title {
+    display: block;
+    font-family: Arial, sans-serif;
+    font-size: 1.25em;
+}
+#search-book-author {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    color: grey;
+}
+#list-form {
+    align-self: center;
+    flex: 1;
+}
+#book-info-form {
+    flex: 5;
 }

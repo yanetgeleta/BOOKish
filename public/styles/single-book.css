@@ -21,7 +21,7 @@
 .single-button {
     border-radius: 8px;
     width: 85%;
-    height: 4em;
+    height: 3em;
     background-color: white;
     position: relative;
     left: 2em;
@@ -46,10 +46,10 @@
     margin-bottom: .5em;
     top: 0em;
 }
-.vl {
+/* .vl {
     border-left: .5em solid #768c9f;
     height: 85em;
     margin-top: auto;
     margin-bottom: auto;
     border-radius: 6px;
-}
+} */
