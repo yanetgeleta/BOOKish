@@ -52,5 +52,6 @@ nav button {
 }
 .on-display-button {
     width: 20%;
+    min-width: 13vw;
     height: 3.2em;
 }

@@ -1,10 +1,20 @@
 import express from "express";
 import bodyParser from "body-parser";
 import axios from "axios";
-import md5 from "md5"
+import md5 from "md5";
+import pg from 'pg';
 
 const app = express();
 app.use(express.static("public"));
+
+const db = new pg.Pool({
+    database: 'Bookish',
+    user: 'user',
+    password: '020804',
+    port: '5432',
+    host: 'localhost'
+})
+
 
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -16,11 +26,13 @@ var reading = [];
 var read = [];
 var wantToRead = [];
 var recommendations = [];
-var categories = ["Fiction", "Mystery", "Thriller", "Science Fiction", "Fantasy", "Romance", "Historical Fiction"];
+var categories = [];
 
-async function categorySearch() {
-    
-}
+const result = await db.query('select * from categories');
+result.rows.forEach(category=> {
+    categories.push(category.name);
+})
+
 app.get("/", async (req,res)=> {
     if(reading.length) {
         let index = 0;
@@ -41,6 +53,7 @@ app.get("/", async (req,res)=> {
 
     var selectedCategory = categories[Math.floor(Math.random() * categories.length)];
     const category = req.query.category || selectedCategory;
+    db.query(`update categories set selected = case when name = $1 then true else false end;`, [category]);
     try {
         const result = await axios.get(baseUrl, {
             params: {
@@ -81,7 +94,6 @@ app.get("/search", async (req, res)=> {
         res.render("search.ejs", {
             values: result.data.items,
             searchInput: searchInput
-            // redirectTo: req.originalUrl
         });
     }
     catch(err) {
@@ -102,7 +114,8 @@ async function listAdder(req, list, array, id, {first, second}) {
                 }
             })
             let exists = array.some(arr=> {
-                return result.data.id === arr.id;   
+                return result.data.id === arr.id;  
+                // checking from the database would be better
             })
             if(!exists) {
                 array.unshift(result.data);
@@ -134,6 +147,9 @@ app.post("/update-list", async (req,res)=> {
     await listAdder(req, "reading", reading, volumeId, {first: wantToRead, second: read});
     await listAdder(req, "read", read, volumeId, {first: wantToRead, second: reading});
     const searchInput = req.body.searchValue;
+    console.log(reading)
+    console.log(read)
+    console.log(wantToRead)
 
     if(req.body.formLocation === "search") {
         res.redirect(`/search?searchValue=${encodeURIComponent(searchInput)}`);
@@ -175,7 +191,7 @@ app.post("/single", (req, res)=> {
 })
 
 app.get("/profile", async(req, res)=> {
-    const hash = md5('yanetgele@gmail.com');
+    const hash = md5('teenmindin@gmail.com');
     const gravatarURL = `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`;
     const books = reading.length + read.length + wantToRead.length;
     var selectedList = wantToRead;
