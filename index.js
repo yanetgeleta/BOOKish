@@ -113,24 +113,27 @@ async function listAdder(req, list, array, id, {first, second}) {
                     key: API_KEY
                 }
             })
-            let exists = array.some(arr=> {
-                return result.data.id === arr.id;  
-                // checking from the database would be better
-            })
-            if(!exists) {
-                array.unshift(result.data);
-                function remover(arr) {
-                    const IfIndex = arr.findIndex((book)=> {
-                        return book.id === result.data.id;
-                    })
-                    if(IfIndex !== -1) {
-                        arr.splice(IfIndex, 1);
-                    }
-                }
+            const title = result.data.volumeInfo.title;
+            const desc = result.data.volumeInfo.description;
+            const averageRating = result.data.volumeInfo.averageRating;
+            const pageCount = result.data.volumeInfo.pageCount;
+            const imageLink = result.data.volumeInfo.imageLinks.thumbnail;
+            const authors = result.data.volumeInfo.authors;
 
-                remover(first);
-                remover(second);
-            }
+            await db.query(`insert into books values ($1, $2, $3, $4, $5, $6)`, [id, title, desc, averageRating, pageCount, imageLink]);
+            for ( const author of authors) {
+                await db.query(`insert into authors(name) values($1) on conflict(name) do nothing`, [author]);
+
+                const authorResult = await db.query(`select id from authors where name = $1`, [author]);
+                // console.log(authorResult.rows[0].id);
+                await db.query(`insert into book_authors values($1, $2)`, [authorResult.rows[0].id, id]);
+            }   
+            await db.query(`insert into user_book_status values(1, $1, $2)`, [id, list]);
+            const arrayRows = await db.query(`select * from book_authors ba
+                inner join authors a on a.id = ba.author_id
+                inner join user_book_status ubs on ubs.book_id = ba.book_id
+                inner join books on books.id = ba.book_id
+                where status = $1`, [list]);
         }
         catch (err) {
             console.log(err.response?.data || err.message);
