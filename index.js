@@ -125,15 +125,16 @@ async function listAdder(req, list, array, id, {first, second}) {
                 await db.query(`insert into authors(name) values($1) on conflict(name) do nothing`, [author]);
 
                 const authorResult = await db.query(`select id from authors where name = $1`, [author]);
-                // console.log(authorResult.rows[0].id);
                 await db.query(`insert into book_authors values($1, $2)`, [authorResult.rows[0].id, id]);
             }   
             await db.query(`insert into user_book_status values(1, $1, $2)`, [id, list]);
             const arrayRows = await db.query(`select * from book_authors ba
-                inner join authors a on a.id = ba.author_id
-                inner join user_book_status ubs on ubs.book_id = ba.book_id
-                inner join books on books.id = ba.book_id
-                where status = $1`, [list]);
+            inner join authors a on a.id = ba.author_id
+            inner join user_book_status ubs on ubs.book_id = ba.book_id
+            inner join books on books.id = ba.book_id
+            where status = $1`, [list]);
+
+            return arrayRows.rows;
         }
         catch (err) {
             console.log(err.response?.data || err.message);
@@ -146,13 +147,10 @@ app.post("/update-list", async (req,res)=> {
         reading.splice(0, 1);
         res.redirect('/');
     }
-    await listAdder(req, "wantToRead", wantToRead, volumeId, {first: reading, second: read})
-    await listAdder(req, "reading", reading, volumeId, {first: wantToRead, second: read});
-    await listAdder(req, "read", read, volumeId, {first: wantToRead, second: reading});
+    wantToRead = await listAdder(req, "wantToRead", wantToRead, volumeId, {first: reading, second: read})
+    reading = await listAdder(req, "reading", reading, volumeId, {first: wantToRead, second: read});
+    read = await listAdder(req, "read", read, volumeId, {first: wantToRead, second: reading});
     const searchInput = req.body.searchValue;
-    console.log(reading)
-    console.log(read)
-    console.log(wantToRead)
 
     if(req.body.formLocation === "search") {
         res.redirect(`/search?searchValue=${encodeURIComponent(searchInput)}`);
