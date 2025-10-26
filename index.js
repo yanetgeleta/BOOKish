@@ -26,30 +26,41 @@ var reading = [];
 var read = [];
 var wantToRead = [];
 var recommendations = [];
-var categories = [];
-
-const result = await db.query('select * from categories');
-result.rows.forEach(category=> {
-    categories.push(category.name);
-})
 
 app.get("/", async (req,res)=> {
-    if(reading.length) {
-        let index = 0;
-        while(index < reading.length) {
-            if(reading[index].volumeInfo.categories) {
-                const exist = categories.find(category=> {
-                    return category === reading[index].volumeInfo.categories[0];
-                })
-                if(!exist) {
-                    categories.unshift(reading[index].volumeInfo.categories[0]);
-                }
-                break;
-            } else {
-                index++;
-            }
-        }
-    }
+    const readingResult = await db.query(`SELECT * from book_authors ba
+            inner join user_book_status ubs on ba.book_id = ubs.book_id
+            inner join books b on b.id = ba.book_id
+            inner join authors a on ba.author_id = a.id
+            where status = 'reading'
+            `);
+    reading = readingResult.rows;
+
+    const categoriesResult = await db.query('select * from categories');
+    const categories = categoriesResult.rows;
+    // categories is undefined because books dont have categories field
+    // in your books table add a categories field
+
+    // if(reading.length > 0) {
+    //     let index = 0;
+    //     while(index < reading.length) {
+    //         if(reading[index].volumeInfo.categories) {
+    //             const exist = categories.find(category=> {
+    //                 return category === reading[index].volumeInfo.categories[0];
+    //             })
+    //             if(!exist) {
+    //                 // categories.unshift(reading[index].volumeInfo.categories[0]);
+    //                 await db.query(`
+    //                     insert into categories (name, selected)
+    //                     values ($1, FALSE)
+    //                 `, [reading[index].volumeInfo.categories[0]])
+    //             }
+    //             break;
+    //         } else {
+    //             index++;
+    //         }
+    //     }
+    // }
 
     var selectedCategory = categories[Math.floor(Math.random() * categories.length)];
     const category = req.query.category || selectedCategory;
@@ -59,12 +70,12 @@ app.get("/", async (req,res)=> {
             params: {
                 key: API_KEY,
                 q: `subject:${category}`,
-                maxResults: 20
+                maxResults: 20,
             }
         })
 
         res.render("index.ejs", {
-        reading: reading[0],
+        reading: reading[reading.length - 1],
         categories: categories,
         items:result.data.items,
         category: category
@@ -105,51 +116,73 @@ app.post("/search", async (req, res)=> {
     const searchInput = req.body.searchValue;
     res.redirect(`/search?searchValue=${encodeURIComponent(searchInput)}`);
 })
-async function listAdder(req, list, array, id, {first, second}) {
+async function listAdder(req, list, id) {
     if(req.body['clicked-result'] === list) {
-        try {
-            const result = await axios.get(baseUrl+"/"+id, {
-                params: {
-                    key: API_KEY
+        const exists = await db.query(`select * from user_book_status where book_id = $1`, [id]);
+        if(exists.rows.length > 0) {
+            await db.query(`update user_book_status set status = $1 where book_id = $2`, [list, id]);
+        } else {
+            try {
+                const result = await axios.get(baseUrl+"/"+id, {
+                    params: {
+                        key: API_KEY
+                    }
+                })
+                const title = result.data.volumeInfo.title;
+                const desc = result.data.volumeInfo.description;
+                const averageRating = result.data.volumeInfo.averageRating;
+                const pageCount = result.data.volumeInfo.pageCount;
+                const imageLink = result.data.volumeInfo.imageLinks.thumbnail;
+                const authors = result.data.volumeInfo.authors;
+                const categories = result.data.volumeInfo.categories[0].split("/");
+
+
+                await db.query(`insert into books values ($1, $2, $3, $4, $5, $6)`, [id, title, desc, averageRating, pageCount, imageLink]);
+                for ( const author of authors) {
+                    await db.query(`insert into authors(name) values($1) on conflict(name) do nothing`, [author]);
+
+                    const authorResult = await db.query(`select id from authors where name = $1`, [author]);
+                    const authorId = authorResult.rows[0].id;
+                    await db.query(`insert into book_authors values($1, $2)`, [authorId, id]);
                 }
-            })
-            const title = result.data.volumeInfo.title;
-            const desc = result.data.volumeInfo.description;
-            const averageRating = result.data.volumeInfo.averageRating;
-            const pageCount = result.data.volumeInfo.pageCount;
-            const imageLink = result.data.volumeInfo.imageLinks.thumbnail;
-            const authors = result.data.volumeInfo.authors;
-
-            await db.query(`insert into books values ($1, $2, $3, $4, $5, $6)`, [id, title, desc, averageRating, pageCount, imageLink]);
-            for ( const author of authors) {
-                await db.query(`insert into authors(name) values($1) on conflict(name) do nothing`, [author]);
-
-                const authorResult = await db.query(`select id from authors where name = $1`, [author]);
-                await db.query(`insert into book_authors values($1, $2)`, [authorResult.rows[0].id, id]);
-            }   
-            await db.query(`insert into user_book_status values(1, $1, $2)`, [id, list]);
-            const arrayRows = await db.query(`select * from book_authors ba
-            inner join authors a on a.id = ba.author_id
-            inner join user_book_status ubs on ubs.book_id = ba.book_id
-            inner join books on books.id = ba.book_id
-            where status = $1`, [list]);
-
-            return arrayRows.rows;
+                await db.query(`insert into user_book_status values(1, $1, $2)`, [id, list]); 
+                for (const category of categories) {
+                    await db.query(`insert into books_categories values ($1, $2)`, [id, category]);
+                }
+            }
+            catch (err) {
+                console.log(err.response?.data || err.message);
+            }
         }
-        catch (err) {
-            console.log(err.response?.data || err.message);
-        }
+        const arrayRows = await db.query(`select * from book_authors ba
+        inner join authors a on a.id = ba.author_id
+        inner join user_book_status ubs on ubs.book_id = ba.book_id
+        inner join books on books.id = ba.book_id
+        where status = $1`, [list]);
+
+        return arrayRows.rows;
     }
 }
 app.post("/update-list", async (req,res)=> {
     const volumeId = req.body['selected-id'];
     if(req.body['clicked-result'] === "notReading") {
-        reading.splice(0, 1);
+        await db.query(`delete from user_book_status where book_id = $1`, [volumeId]);
+        await db.query(`delete from book_authors where book_id = $1`, [volumeId]);
+        await db.query(`delete from books where id = $1`, [volumeId]);
+
+        const result = await db.query(`SELECT * from book_authors ba
+            inner join user_book_status ubs on ba.book_id = ubs.book_id
+            inner join books b on b.id = ba.book_id
+            inner join authors a on ba.author_id = a.id
+            where status = 'reading'
+            `);
+        reading = result.rows;
         res.redirect('/');
+        // instead we have to find the book and remove it from the database, from all children and parent tables
     }
-    wantToRead = await listAdder(req, "wantToRead", wantToRead, volumeId, {first: reading, second: read})
-    reading = await listAdder(req, "reading", reading, volumeId, {first: wantToRead, second: read});
-    read = await listAdder(req, "read", read, volumeId, {first: wantToRead, second: reading});
+    wantToRead = await listAdder(req, "wantToRead", volumeId)
+    reading = await listAdder(req, "reading", volumeId);
+    read = await listAdder(req, "read", volumeId);
     const searchInput = req.body.searchValue;
 
     if(req.body.formLocation === "search") {
