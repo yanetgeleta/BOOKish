@@ -36,31 +36,21 @@ app.get("/", async (req,res)=> {
             `);
     reading = readingResult.rows;
 
-    const categoriesResult = await db.query('select * from categories');
-    const categories = categoriesResult.rows;
     // categories is undefined because books dont have categories field
     // in your books table add a categories field
 
-    // if(reading.length > 0) {
-    //     let index = 0;
-    //     while(index < reading.length) {
-    //         if(reading[index].volumeInfo.categories) {
-    //             const exist = categories.find(category=> {
-    //                 return category === reading[index].volumeInfo.categories[0];
-    //             })
-    //             if(!exist) {
-    //                 // categories.unshift(reading[index].volumeInfo.categories[0]);
-    //                 await db.query(`
-    //                     insert into categories (name, selected)
-    //                     values ($1, FALSE)
-    //                 `, [reading[index].volumeInfo.categories[0]])
-    //             }
-    //             break;
-    //         } else {
-    //             index++;
-    //         }
-    //     }
-    // }
+    if(reading.length > 0) {
+        const readingCategory = db.query(` 
+            select category from books_category
+            where book_id = $1
+        `, reading[reading.length - 1]);
+        
+        readingCategory.rows.forEach(async category => {
+            await db.query(`insert into categories (name, selected) values ($1, FALSE) `, [category.category]);
+        });
+    }
+    const categoriesResult = await db.query('select * from categories');
+    const categories = categoriesResult.rows;
 
     var selectedCategory = categories[Math.floor(Math.random() * categories.length)];
     const category = req.query.category || selectedCategory;
