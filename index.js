@@ -40,19 +40,21 @@ app.get("/", async (req,res)=> {
     // in your books table add a categories field
 
     if(reading.length > 0) {
-        const readingCategory = db.query(` 
-            select category from books_category
+        const readingCategory = await db.query(` 
+            select category from books_categories
             where book_id = $1
-        `, reading[reading.length - 1]);
-        
-        readingCategory.rows.forEach(async category => {
-            await db.query(`insert into categories (name, selected) values ($1, FALSE) `, [category.category]);
-        });
+        `, [reading[reading.length - 1]]);
+        if(readingCategory.rows.length > 0) {
+            readingCategory.rows.forEach(async category => {
+                await db.query(`insert into categories (name, selected) values ($1, FALSE) `, [category.category]);
+            });
+        }
     }
     const categoriesResult = await db.query('select * from categories');
     const categories = categoriesResult.rows;
+    // console.log(categories);
 
-    var selectedCategory = categories[Math.floor(Math.random() * categories.length)];
+    var selectedCategory = categories[Math.floor(Math.random() * categories.length)].name;
     const category = req.query.category || selectedCategory;
     db.query(`update categories set selected = case when name = $1 then true else false end;`, [category]);
     try {

@@ -49,7 +49,7 @@
             <!-- we will use a loop to go thru the array I will send -->
              <%for(let i = 0; i < categories.length; i++) {%>
                 <form class="genre-button-form" action="/" method="post">
-                    <button data-id="<%= categories[i] %>" class="genre-button" name="category" type="submit" value="<%= categories[i] %>"><%= categories[i] %></button>
+                    <button data-id="<%= categories[i].name %>" class="genre-button" name="category" type="submit" value="<%= categories[i].name %>"><%= categories[i].name %></button>
                 </form>
              <%}%>
              <!-- I     am gonna through the genres the user is reading and place them here, put them in the array using shift first -->

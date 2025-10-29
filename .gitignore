@@ -1,48 +1,148 @@
-# Dependencies
+# ============================
+# DEPENDENCIES
+# ============================
 node_modules/
+jspm_packages/
+bower_components/
+web_modules/
 
-# Logs
+# ============================
+# LOGS
+# ============================
+logs
+*.log
+*.log.*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-logs
-*.log
-*.log.*
+lerna-debug.log*
 
-# Runtime data
+# ============================
+# DIAGNOSTIC REPORTS
+# ============================
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# ============================
+# RUNTIME DATA
+# ============================
 pids
 *.pid
 *.seed
 *.pid.lock
 
-# Environment variables
+# ============================
+# ENVIRONMENT VARIABLES
+# ============================
 .env
+.env.*
 .env.*.local
+!.env.example
 
-# Build output / coverage
+# ============================
+# BUILD OUTPUT / COVERAGE
+# ============================
 dist/
 build/
+build/Release
 coverage/
+*.lcov
+.nyc_output
+.output
+.nuxt
+.vuepress/dist
+.temp
+.docusaurus
+.svelte-kit/
+**/.vitepress/dist
+**/.vitepress/cache
 
-# Cache
+# ============================
+# CACHE DIRECTORIES
+# ============================
 .cache/
 .parcel-cache/
-.next/
-out/
+.vite/
 tmp/
 temp/
+.grunt
+.fusebox/
+.serverless/
+.firebase/
+.dynamodb/
 
-# OS files
-.DS_Store
-Thumbs.db
+# ============================
+# TESTING / REPORTING
+# ============================
+lib-cov
+.vscode-test
 
-# IDE / editor settings
-.vscode/
-.idea/
+# ============================
+# PACKAGE MANAGER FILES
+# ============================
+.yarn-integrity
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.npm
+
+# ============================
+# TOOL CACHES
+# ============================
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# ============================
+# TEMPORARY / BACKUP FILES
+# ============================
+*.bak
+*.tmp
 *.swp
 *.swo
 
-# Other
-*.bak
-*.tmp
+# ============================
+# REPL / PACK / HISTORY FILES
+# ============================
+.node_repl_history
+*.tgz
+
+# ============================
+# VITE / FRONTEND BUILD FILES
+# ============================
+.next
+out
+.nuxt
+.output
+.vite/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# ============================
+# STATIC SITE GENERATORS
+# ============================
+.vuepress/dist
+.cache/
+.temp
+
+# ============================
+# OS FILES
+# ============================
+.DS_Store
+Thumbs.db
+
+# ============================
+# IDE / EDITOR SETTINGS
+# ============================
+.vscode/
+.idea/
+
+# ============================
+# MISC
+# ============================
+.lock-wscript
+.tern-port
