@@ -219,7 +219,7 @@ app.post("/single", (req, res)=> {
 app.get("/profile", async(req, res)=> {
     const hash = md5('teenmindin@gmail.com');
     const gravatarURL = `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`;
-    const books = reading.length + read.length + wantToRead.length;
+    const books = (reading?.length || 0) + (read?.length || 0) + (wantToRead?.length || 0);
     var selectedList = wantToRead;
     var selectedListName = "Want to Read";
 
@@ -232,7 +232,7 @@ app.get("/profile", async(req, res)=> {
             selectedListName = "Read";
         }
     }
-
+    // console.log(reading);
     const data = {
         books: books,
         list: selectedList,
