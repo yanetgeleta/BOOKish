@@ -22,9 +22,18 @@ const port = 3000;
 const API_KEY = "AIzaSyBRfVMUzVveYlQeKNb5KiFXur31SELSzCA";
 const baseUrl = "https://www.googleapis.com/books/v1/volumes";
 
-var reading = [];
-var read = [];
-var wantToRead = [];
+async function listGetter (status) {
+    const result =  await db.query(`select * from book_authors ba
+            inner join authors a on a.id = ba.author_id
+            inner join user_book_status ubs on ubs.book_id = ba.book_id
+            inner join books on books.id = ba.book_id
+            where status = $1`, [status]);
+    return result.rows;
+}
+
+let reading = await listGetter('reading');
+let read = await listGetter('read');
+let wantToRead = await listGetter('wantToRead');
 var recommendations = [];
 
 app.get("/", async (req,res)=> {
@@ -65,7 +74,7 @@ app.get("/", async (req,res)=> {
                 maxResults: 20,
             }
         })
-
+        // console.log(wantToRead);
         res.render("index.ejs", {
         reading: reading[reading.length - 1],
         categories: categories,
@@ -147,11 +156,12 @@ async function listAdder(req, list, id) {
             }
         }
         const arrayRows = await db.query(`select * from book_authors ba
-        inner join authors a on a.id = ba.author_id
-        inner join user_book_status ubs on ubs.book_id = ba.book_id
-        inner join books on books.id = ba.book_id
-        where status = $1`, [list]);
-
+            inner join authors a on a.id = ba.author_id
+            inner join user_book_status ubs on ubs.book_id = ba.book_id
+            inner join books on books.id = ba.book_id
+            where status = $1`, [list]);
+        
+        // console.log(arrayRows.rows);
         return arrayRows.rows;
     }
 }
@@ -219,9 +229,9 @@ app.post("/single", (req, res)=> {
 app.get("/profile", async(req, res)=> {
     const hash = md5('teenmindin@gmail.com');
     const gravatarURL = `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`;
-    const books = (reading?.length || 0) + (read?.length || 0) + (wantToRead?.length || 0);
-    var selectedList = wantToRead;
-    var selectedListName = "Want to Read";
+    const books = await db.query(`select count(id) from books`);
+    let selectedList = wantToRead;
+    let selectedListName = "Want to Read";
 
     if(req.query.list !== "wantToRead") {
         if(req.query.list === "reading") {
@@ -232,9 +242,14 @@ app.get("/profile", async(req, res)=> {
             selectedListName = "Read";
         }
     }
-    // console.log(reading);
+    // console.log(selectedList);
+    for(let i = 0; i < selectedList.length; i++) {
+        for(let j = i; j < selectedList.length; j++) {
+            
+        }
+    }
     const data = {
-        books: books,
+        books: books.rows[0].count,
         list: selectedList,
         profilePic: gravatarURL,
         listName: selectedListName

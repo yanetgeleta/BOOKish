@@ -23,27 +23,27 @@
         <!-- needed it for styling the buttons -->
         <hr>
         <!-- <div style="width: 100%;" class="my-books"> -->
-            <% const listItems = data.list; %>
-            <%for(let i = 0; i < listItems.length; i++) {%>
-                <form  action="/single" method="post">
-                    <% let j = i %>
-                    <% let authors = [listItems[i].name] %>
-                    <% while(listItems[j].book_id === listItems[j + 1].book_id) {%>
-                        <% authors.push(listItems[j + 1].name) %>
-                    <% } %>
-                    <div class="profile-books">
-                        <div>
-                            <input type="hidden" value="<%= listItems[i].book_id %>" name="single-id">
-                            <p style="color: rgb(7, 127, 207);"><%= data.listName %></p>
-                            <p style="font-size: 1.4em; font-weight: bold;" class="clickable-single-book"><%= listItems[i].title %></p>
-                            <p style="color: grey"><%= listItems[i].author_id? authors.join(", "): "Unknown Author" %></p>
-                            <button class="on-display-button" >✓ <%= data.listName %></button>
-                        </div>
-                        <img class="clickable-single-book" src="<%= listItems[i].image_link? listItems[i].image_link: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
+        <% const listItems = data.list; %>
+        <%for(let i = 0; i < listItems.length; i++) {%>
+            <form  action="/single" method="post">
+                <% let j = i %>
+                <% let authors = [listItems[i].name] %>
+                <% while(listItems[j+1] && listItems[j].book_id === listItems[j + 1].book_id) {%>
+                    <% authors.push(listItems[j + 1].name) %>
+                <% } %>
+                <div class="profile-books">
+                    <div>
+                        <input type="hidden" value="<%= listItems[i].book_id %>" name="single-id">
+                        <p style="color: rgb(7, 127, 207);"><%= data.listName %></p>
+                        <p style="font-size: 1.4em; font-weight: bold;" class="clickable-single-book"><%= listItems[i].title %></p>
+                        <p style="color: grey"><%= listItems[i].author_id? authors.join(", "): "Unknown Author" %></p>
+                        <button class="on-display-button" >✓ <%= data.listName %></button>
                     </div>
-                </form>
-                <hr>
-            <%}%>
+                    <img class="clickable-single-book" src="<%= listItems[i].image_link? listItems[i].image_link: `https://openlibrary.org/images/icons/avatar_book-sm.png` %>">
+                </div>
+            </form>
+            <hr>
+        <%}%>
         <!-- </div> -->
     </div>
 </main>
