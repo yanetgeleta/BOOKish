@@ -23,11 +23,16 @@ const API_KEY = "AIzaSyBRfVMUzVveYlQeKNb5KiFXur31SELSzCA";
 const baseUrl = "https://www.googleapis.com/books/v1/volumes";
 
 async function listGetter (status) {
-    const result =  await db.query(`select * from book_authors ba
-            inner join authors a on a.id = ba.author_id
-            inner join user_book_status ubs on ubs.book_id = ba.book_id
-            inner join books on books.id = ba.book_id
-            where status = $1`, [status]);
+    const result =  await db.query(`select 
+        b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link,
+        ARRAY_AGG(a.name) as author
+        from book_authors as ba
+        join user_book_status AS ubs on ba.book_id = ubs.book_id
+        join books AS b on b.id = ba.book_id
+        join authors AS a on ba.author_id = a.id
+        where status = $1
+        GROUP BY
+        b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link`, [status]);
     return result.rows;
 }
 
@@ -37,12 +42,17 @@ let wantToRead = await listGetter('wantToRead');
 var recommendations = [];
 
 app.get("/", async (req,res)=> {
-    const readingResult = await db.query(`SELECT * from book_authors ba
-            inner join user_book_status ubs on ba.book_id = ubs.book_id
-            inner join books b on b.id = ba.book_id
-            inner join authors a on ba.author_id = a.id
-            where status = 'reading'
-            `);
+    const readingResult = await db.query(`select 
+        b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link,
+        ARRAY_AGG(a.name) as author
+        from book_authors as ba
+        join user_book_status AS ubs on ba.book_id = ubs.book_id
+        join books AS b on b.id = ba.book_id
+        join authors AS a on ba.author_id = a.id
+        where status = 'reading'
+        GROUP BY
+        b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link
+        `);
     reading = readingResult.rows;
 
     // categories is undefined because books dont have categories field
@@ -76,7 +86,7 @@ app.get("/", async (req,res)=> {
         })
         // console.log(wantToRead);
         res.render("index.ejs", {
-        reading: reading[reading.length - 1],
+        reading: reading[0],
         categories: categories,
         items:result.data.items,
         category: category
@@ -155,11 +165,16 @@ async function listAdder(req, list, id) {
                 console.log(err.response?.data || err.message);
             }
         }
-        const arrayRows = await db.query(`select * from book_authors ba
-            inner join authors a on a.id = ba.author_id
-            inner join user_book_status ubs on ubs.book_id = ba.book_id
-            inner join books on books.id = ba.book_id
-            where status = $1`, [list]);
+        const arrayRows = await db.query(`select 
+            b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link,
+            ARRAY_AGG(a.name) as author
+            from book_authors as ba
+            join user_book_status AS ubs on ba.book_id = ubs.book_id
+            join books AS b on b.id = ba.book_id
+            join authors AS a on ba.author_id = a.id
+            where status = $1
+            GROUP BY
+            b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link`, [list]);
         
         // console.log(arrayRows.rows);
         return arrayRows.rows;
@@ -172,12 +187,17 @@ app.post("/update-list", async (req,res)=> {
         await db.query(`delete from book_authors where book_id = $1`, [volumeId]);
         await db.query(`delete from books where id = $1`, [volumeId]);
 
-        const result = await db.query(`SELECT * from book_authors ba
-            inner join user_book_status ubs on ba.book_id = ubs.book_id
-            inner join books b on b.id = ba.book_id
-            inner join authors a on ba.author_id = a.id
+        const result = await db.query(`select 
+            b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link,
+            ARRAY_AGG(a.name) as author
+            from book_authors as ba
+            join user_book_status AS ubs on ba.book_id = ubs.book_id
+            join books AS b on b.id = ba.book_id
+            join authors AS a on ba.author_id = a.id
             where status = 'reading'
-            `);
+            GROUP BY
+            b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link
+        `);
         reading = result.rows;
         res.redirect('/');
         // instead we have to find the book and remove it from the database, from all children and parent tables
@@ -230,6 +250,10 @@ app.get("/profile", async(req, res)=> {
     const hash = md5('teenmindin@gmail.com');
     const gravatarURL = `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`;
     const books = await db.query(`select count(id) from books`);
+
+    reading = await listGetter('reading');
+    read = await listGetter('read');
+    wantToRead = await listGetter('wantToRead');
     let selectedList = wantToRead;
     let selectedListName = "Want to Read";
 
@@ -242,12 +266,7 @@ app.get("/profile", async(req, res)=> {
             selectedListName = "Read";
         }
     }
-    // console.log(selectedList);
-    for(let i = 0; i < selectedList.length; i++) {
-        for(let j = i; j < selectedList.length; j++) {
-            
-        }
-    }
+    // console.log(wantToRead);
     const data = {
         books: books.rows[0].count,
         list: selectedList,
