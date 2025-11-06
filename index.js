@@ -3,6 +3,11 @@ import bodyParser from "body-parser";
 import axios from "axios";
 import md5 from "md5";
 import pg from 'pg';
+import passport from "passport";
+import env from "dotenv";
+import session from "express-session";
+import GoogleStrategy from "passport-google-oauth2";
+import { Strategy } from "passport-local";
 
 const app = express();
 app.use(express.static("public"));
