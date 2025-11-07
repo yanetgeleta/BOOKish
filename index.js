@@ -8,23 +8,36 @@ import env from "dotenv";
 import session from "express-session";
 import GoogleStrategy from "passport-google-oauth2";
 import { Strategy } from "passport-local";
+import bcrypt from "bcrypt";
 
 const app = express();
 app.use(express.static("public"));
+env.config();
+const saltRounds = 10;
+
+app.use(
+    session({
+        secret: process.env.SECRET,
+        resave: false,
+        saveUninitialized: true,
+    })
+)
 
 const db = new pg.Pool({
-    database: 'Bookish',
-    user: 'user',
-    password: '020804',
-    port: '5432',
-    host: 'localhost'
+    database: process.env.DB_DATABASE,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+    host: process.env.DB_HOST
 })
 
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(bodyParser.urlencoded({extended: true}));
 
-const port = 3000;
-const API_KEY = "AIzaSyBRfVMUzVveYlQeKNb5KiFXur31SELSzCA";
+const port = process.env.SERVER_PORT;
+const API_KEY = process.env.API_KEY;
 const baseUrl = "https://www.googleapis.com/books/v1/volumes";
 
 async function listGetter (status) {
@@ -46,65 +59,114 @@ let read = await listGetter('read');
 let wantToRead = await listGetter('wantToRead');
 var recommendations = [];
 
-app.get("/", async (req,res)=> {
-    const readingResult = await db.query(`select 
-        b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link,
-        ARRAY_AGG(a.name) as author
-        from book_authors as ba
-        join user_book_status AS ubs on ba.book_id = ubs.book_id
-        join books AS b on b.id = ba.book_id
-        join authors AS a on ba.author_id = a.id
-        where status = 'reading'
-        GROUP BY
-        b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link
-        `);
-    reading = readingResult.rows;
+app.get("/",(req, res)=> {
+    res.render("home.ejs");
+})
 
-    // categories is undefined because books dont have categories field
-    // in your books table add a categories field
+app.get("/login", (req,res)=> {
+    res.render("login.ejs");
+})
 
-    if(reading.length > 0) {
-        const readingCategory = await db.query(` 
-            select category from books_categories
-            where book_id = $1
-        `, [reading[reading.length - 1]]);
-        if(readingCategory.rows.length > 0) {
-            readingCategory.rows.forEach(async category => {
-                await db.query(`insert into categories (name, selected) values ($1, FALSE) `, [category.category]);
-            });
-        }
-    }
-    const categoriesResult = await db.query('select * from categories');
-    const categories = categoriesResult.rows;
-    // console.log(categories);
+app.post("/login", passport.authenticate("local", {
+    successRedirect: "/index",
+    failureRedirect: "/login"
+}))
 
-    var selectedCategory = categories[Math.floor(Math.random() * categories.length)].name;
-    const category = req.query.category || selectedCategory;
-    db.query(`update categories set selected = case when name = $1 then true else false end;`, [category]);
+app.post("/register", async (req, res)=> {
+    const fname = req.body.fname;
+    const lname = req.body.lname;
+    const email = req.body.email;
+    const plainPassword = req.body.password;
+
     try {
-        const result = await axios.get(baseUrl, {
-            params: {
-                key: API_KEY,
-                q: `subject:${category}`,
-                maxResults: 20,
-            }
-        })
-        // console.log(wantToRead);
-        res.render("index.ejs", {
-        reading: reading[0],
-        categories: categories,
-        items:result.data.items,
-        category: category
-    });
-    }
-    catch(err) {
-        console.error(err.response?.data || err.message);
+        const result = await db.query(`select * from users where email = $1`, [email]);
+        if(result.rows.length > 0) {
+            res.redirect("/login");
+        } else {
+            bcrypt.hash(plainPassword, saltRounds, async function(err, hash) {
+                if(err) {
+                    console.log(err)
+                } else {
+                    const insertResult = await db.query( 
+                        `insert into users(fname,lname,email, password)
+                        values ($1, $2, $3, $4) returning *
+                        `, [fname, lname, email, hash]);
+                    const user = insertResult.rows[0];
+                    req.login(user, (err)=> {
+                        console.log(err);
+                        res.redirect("/index");
+                    })
+                }
+            })
+        }
+    } catch(err) {
+        console.log(err);
     }
 })
 
-app.post("/", async(req, res)=> {
+app.get("/index", async (req,res)=> {
+    if(req.isAuthenticated()) {
+        const readingResult = await db.query(`select 
+            b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link,
+            ARRAY_AGG(a.name) as author
+            from book_authors as ba
+            join user_book_status AS ubs on ba.book_id = ubs.book_id
+            join books AS b on b.id = ba.book_id
+            join authors AS a on ba.author_id = a.id
+            where status = 'reading'
+            GROUP BY
+            b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link
+            `);
+        reading = readingResult.rows;
+
+        // categories is undefined because books dont have categories field
+        // in your books table add a categories field
+
+        if(reading.length > 0) {
+            const readingCategory = await db.query(` 
+                select category from books_categories
+                where book_id = $1
+            `, [reading[reading.length - 1]]);
+            if(readingCategory.rows.length > 0) {
+                readingCategory.rows.forEach(async category => {
+                    await db.query(`insert into categories (name, selected) values ($1, FALSE) `, [category.category]);
+                });
+            }
+        }
+        const categoriesResult = await db.query('select * from categories');
+        const categories = categoriesResult.rows;
+        // console.log(categories);
+
+        var selectedCategory = categories[Math.floor(Math.random() * categories.length)].name;
+        const category = req.query.category || selectedCategory;
+        db.query(`update categories set selected = case when name = $1 then true else false end;`, [category]);
+        try {
+            const result = await axios.get(baseUrl, {
+                params: {
+                    key: API_KEY,
+                    q: `subject:${category}`,
+                    maxResults: 20,
+                }
+            })
+            // console.log(wantToRead);
+            res.render("index.ejs", {
+            reading: reading[0],
+            categories: categories,
+            items:result.data.items,
+            category: category
+        });
+        }
+        catch(err) {
+            console.error(err.response?.data || err.message);
+        }
+    } else {
+        res.redirect("/login");
+    }
+})
+
+app.post("/index", async(req, res)=> {
     const category = req.body.category;
-    res.redirect(`/?category=${encodeURIComponent(category)}`);
+    res.redirect(`/index?category=${encodeURIComponent(category)}`);
 })
 
 app.get("/search", async (req, res)=> {
@@ -285,6 +347,39 @@ app.post("/profile", (req, res)=> {
     const list = req.body.profileList;
     res.redirect(`/profile?list=${encodeURIComponent(list)}`);
 })
+
+passport.use("local", new Strategy(async function verify(email, password, cb) {
+    try {
+        const result = await db.query(`select * from users where email = $1 returning *`, [email]);
+        if(result.rows[0].length > 0) {
+            const user = result.rows[0];
+            const hashedPassword = user.password;
+            bcrypt.compare(password, hashedPassword, (err, valid) => {
+                if(err) {
+                    return cb(err);
+                } else {
+                    if(valid) {
+                        return cb(null, user);
+                    } else {
+                        return cb(null, false)
+                    }
+                }
+            });
+        } else {
+            return cb("User not found");
+        }
+
+    } catch(err) {
+        return cb(err);
+    }
+}));
+
+passport.serializeUser((user, cb)=> {
+    cb(null, user)
+});
+passport.deserializeUser((user, cb)=> {
+    cb(null, user)
+});
 
 app.listen(port, ()=> {
     console.log(`Server is running on ${port}`)
