@@ -20,6 +20,9 @@ app.use(
         secret: process.env.SECRET,
         resave: false,
         saveUninitialized: true,
+        cookie: {
+            maxAge: 1000 * 60 * 60 * 24
+        }
     })
 )
 
@@ -59,7 +62,7 @@ let read = await listGetter('read');
 let wantToRead = await listGetter('wantToRead');
 var recommendations = [];
 
-app.get("/",(req, res)=> {
+app.get("/home",(req, res)=> {
     res.render("home.ejs");
 })
 
@@ -67,44 +70,7 @@ app.get("/login", (req,res)=> {
     res.render("login.ejs");
 })
 
-app.post("/login", passport.authenticate("local", {
-    successRedirect: "/index",
-    failureRedirect: "/login"
-}))
-
-app.post("/register", async (req, res)=> {
-    const fname = req.body.fname;
-    const lname = req.body.lname;
-    const email = req.body.email;
-    const plainPassword = req.body.password;
-
-    try {
-        const result = await db.query(`select * from users where email = $1`, [email]);
-        if(result.rows.length > 0) {
-            res.redirect("/login");
-        } else {
-            bcrypt.hash(plainPassword, saltRounds, async function(err, hash) {
-                if(err) {
-                    console.log(err)
-                } else {
-                    const insertResult = await db.query( 
-                        `insert into users(fname,lname,email, password)
-                        values ($1, $2, $3, $4) returning *
-                        `, [fname, lname, email, hash]);
-                    const user = insertResult.rows[0];
-                    req.login(user, (err)=> {
-                        console.log(err);
-                        res.redirect("/index");
-                    })
-                }
-            })
-        }
-    } catch(err) {
-        console.log(err);
-    }
-})
-
-app.get("/index", async (req,res)=> {
+app.get("/", async (req,res)=> {
     if(req.isAuthenticated()) {
         const readingResult = await db.query(`select 
             b.id, ubs.user_id, ubs.status, b.title, b.description, b.average_rating, b.page_count,b.image_link,
@@ -160,13 +126,50 @@ app.get("/index", async (req,res)=> {
             console.error(err.response?.data || err.message);
         }
     } else {
-        res.redirect("/login");
+        res.redirect("/home");
     }
 })
 
-app.post("/index", async(req, res)=> {
+app.post("/register", async (req, res)=> {
+    const fname = req.body.fname;
+    const lname = req.body.lname;
+    const email = req.body.username;
+    const plainPassword = req.body.password;
+
+    try {
+        const result = await db.query(`select * from users where email = $1`, [email]);
+        if(result.rows.length > 0) {
+            res.redirect("/login");
+        } else {
+            bcrypt.hash(plainPassword, saltRounds, async function(err, hash) {
+                if(err) {
+                    console.log(err)
+                } else {
+                    const insertResult = await db.query( 
+                        `insert into users(fname,lname,email, password)
+                        values ($1, $2, $3, $4) returning *
+                        `, [fname, lname, username, hash]);
+                    const user = insertResult.rows[0];
+                    req.login(user, (err)=> {
+                        console.log(err);
+                        res.redirect("/");
+                    })
+                }
+            })
+        }
+    } catch(err) {
+        console.log(err);
+    }
+})
+
+app.post("/login", passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/login"
+}))
+
+app.post("/", async(req, res)=> {
     const category = req.body.category;
-    res.redirect(`/index?category=${encodeURIComponent(category)}`);
+    res.redirect(`/?category=${encodeURIComponent(category)}`);
 })
 
 app.get("/search", async (req, res)=> {
@@ -348,28 +351,33 @@ app.post("/profile", (req, res)=> {
     res.redirect(`/profile?list=${encodeURIComponent(list)}`);
 })
 
-passport.use("local", new Strategy(async function verify(email, password, cb) {
+passport.use("local", new Strategy(async function verify(username, password, cb) {
     try {
-        const result = await db.query(`select * from users where email = $1 returning *`, [email]);
-        if(result.rows[0].length > 0) {
+        const result = await db.query(`select * from users where email = $1`, [username]);
+        if(result.rows.length > 0) {
             const user = result.rows[0];
             const hashedPassword = user.password;
             bcrypt.compare(password, hashedPassword, (err, valid) => {
                 if(err) {
+                    console.log(err)
                     return cb(err);
                 } else {
                     if(valid) {
+                        console.log("successfully sent user data");
                         return cb(null, user);
                     } else {
+                        console.log("wrong password")
                         return cb(null, false)
                     }
                 }
             });
         } else {
+            console.log("user not found");
             return cb("User not found");
         }
 
     } catch(err) {
+        console.log(err)
         return cb(err);
     }
 }));
