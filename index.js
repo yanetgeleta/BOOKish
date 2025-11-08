@@ -10,6 +10,7 @@ import GoogleStrategy from "passport-google-oauth2";
 import { Strategy } from "passport-local";
 import bcrypt from "bcrypt";
 
+
 const app = express();
 app.use(express.static("public"));
 env.config();
@@ -42,6 +43,14 @@ app.use(bodyParser.urlencoded({extended: true}));
 const port = process.env.SERVER_PORT;
 const API_KEY = process.env.API_KEY;
 const baseUrl = "https://www.googleapis.com/books/v1/volumes";
+
+app.post("/auth/google", passport.authenticate("google", {
+    scope: ["profile", "email"]
+}))
+app.get("/auth/google/", passport.authenticate("google", {
+    successRedirect: "/",
+    failureRedirect: "/login"
+}))
 
 async function listGetter (status) {
     const result =  await db.query(`select 
@@ -381,6 +390,27 @@ passport.use("local", new Strategy(async function verify(username, password, cb)
         return cb(err);
     }
 }));
+
+passport.use("google", new GoogleStrategy({
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/"
+}, async (accessToken, refreshToken, profile, cb)=> {
+    try {
+        // console.log(profile);
+        const result = await db.query(`select * from users where email = $1`, [profile.email]);
+        if(result.rows.length === 0) {
+            const newUser = await db.query(`insert into users (fname, lname, email, password)
+                values ($1, $2, $3, $4) returning *
+                `, [profile.given_name, profile.family_name, profile.email, profile.id]);
+            cb (null, newUser.rows[0]);
+        } else {
+            cb (null, result.rows[0]);
+        }
+    }catch(err) {
+        cb (err);
+    }
+}))
 
 passport.serializeUser((user, cb)=> {
     cb(null, user)
